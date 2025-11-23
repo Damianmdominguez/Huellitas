@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.huellitas.model.Mascota
 
 class MascotasAdapter(
-    private val context: Context,
-    private var listaMascotas: List<Mascota>
+    private val context: Context
 ) : RecyclerView.Adapter<MascotasAdapter.MascotaViewHolder>() {
+
+    private var listaMascotas = emptyList<Mascota>()
 
     inner class MascotaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvNombre: TextView = view.findViewById(R.id.tvNombreMascota)
@@ -21,7 +22,6 @@ class MascotasAdapter(
         val tvContacto: TextView = view.findViewById(R.id.tvContacto)
         val tvCastrado: TextView = view.findViewById(R.id.tvCastrado)
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MascotaViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_mascota, parent, false)
@@ -47,5 +47,10 @@ class MascotasAdapter(
 
     override fun getItemCount(): Int {
         return listaMascotas.size
+    }
+
+    fun setMascotas(mascotas: List<Mascota>) {
+        this.listaMascotas = mascotas
+        notifyDataSetChanged()
     }
 }

@@ -1,39 +1,35 @@
 package com.example.huellitas
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.huellitas.model.Mascota // Importamos nuestro Objeto Core (Paso 2)
+import androidx.lifecycle.ViewModelProvider
+import com.example.huellitas.model.Mascota
+import com.example.huellitas.viewmodel.MascotaViewModel
 import com.google.android.material.textfield.TextInputEditText
-import com.google.gson.Gson // Importamos Gson (Paso 0)
-import com.google.gson.reflect.TypeToken
-import java.util.UUID // Para generar un ID único
 
 class CargaMascotaFragment : Fragment() {
 
-    companion object {
-        const val PREFS_NAME_MASCOTAS = "MascotasPrefs"
-        const val KEY_MASCOTAS_LISTA = "mascotas_lista"
-    }
-
-    private lateinit var etNombreMascota: TextInputEditText
+    private lateinit var etNombre: TextInputEditText
     private lateinit var spinnerEspecie: Spinner
     private lateinit var spinnerEstado: Spinner
     private lateinit var etDescripcion: TextInputEditText
-    private lateinit var etZona: TextInputEditText
+
+    private lateinit var etZona: AutoCompleteTextView
+
     private lateinit var etContacto: TextInputEditText
     private lateinit var chkCastrado: CheckBox
     private lateinit var btnGuardar: Button
 
-    private val gson = Gson()
-
+    private lateinit var mascotaViewModel: MascotaViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,7 +37,7 @@ class CargaMascotaFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_carga_mascota, container, false)
 
-        etNombreMascota = view.findViewById(R.id.etNombreMascota)
+        etNombre = view.findViewById(R.id.etNombreMascota)
         spinnerEspecie = view.findViewById(R.id.spinnerEspecie)
         spinnerEstado = view.findViewById(R.id.spinnerEstado)
         etDescripcion = view.findViewById(R.id.etDescripcion)
@@ -50,19 +46,33 @@ class CargaMascotaFragment : Fragment() {
         chkCastrado = view.findViewById(R.id.chkCastrado)
         btnGuardar = view.findViewById(R.id.btnGuardar)
 
+        mascotaViewModel = ViewModelProvider(this).get(MascotaViewModel::class.java)
+
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupBarriosDropdown()
+
         btnGuardar.setOnClickListener {
             guardarMascota()
         }
     }
 
+    private fun setupBarriosDropdown() {
+        val barriosAdapter = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.barrios_caba,
+            android.R.layout.simple_dropdown_item_1line
+        )
+        etZona.setAdapter(barriosAdapter)
+
+    }
+
     private fun guardarMascota() {
-        val nombre = etNombreMascota.text.toString().trim()
+        val nombre = etNombre.text.toString().trim()
         val descripcion = etDescripcion.text.toString().trim()
         val zona = etZona.text.toString().trim()
         val contacto = etContacto.text.toString().trim()
@@ -73,49 +83,19 @@ class CargaMascotaFragment : Fragment() {
         }
 
         val nuevaMascota = Mascota(
-            id = UUID.randomUUID().toString(),
             nombre = nombre.ifEmpty { "Sin nombre" },
             especie = spinnerEspecie.selectedItem.toString(),
             estado = spinnerEstado.selectedItem.toString(),
             descripcion = descripcion,
             contacto = contacto,
             zona = zona,
-            castrado = chkCastrado.isChecked //
+            castrado = chkCastrado.isChecked
         )
 
-
-        persistirMascota(nuevaMascota)
+        mascotaViewModel.insert(nuevaMascota)
 
         Toast.makeText(requireContext(), getString(R.string.msg_mascota_guardada), Toast.LENGTH_LONG).show()
 
-        etNombreMascota.text?.clear()
-        etDescripcion.text?.clear()
-        etZona.text?.clear()
-        etContacto.text?.clear()
-        chkCastrado.isChecked = false
-        spinnerEspecie.setSelection(0)
-        spinnerEstado.setSelection(0)
-    }
-
-
-    private fun persistirMascota(mascota: Mascota) {
-        val prefs = requireActivity().getSharedPreferences(PREFS_NAME_MASCOTAS, Context.MODE_PRIVATE)
-
-        val jsonListaActual = prefs.getString(KEY_MASCOTAS_LISTA, null)
-
-        val listaMascotas: MutableList<Mascota>
-
-        if (jsonListaActual == null) {
-            listaMascotas = mutableListOf()
-        } else {
-            val tipoLista = object : TypeToken<MutableList<Mascota>>() {}.type
-            listaMascotas = gson.fromJson(jsonListaActual, tipoLista)
-        }
-
-        listaMascotas.add(0, mascota)
-
-        val jsonListaNueva = gson.toJson(listaMascotas)
-
-        prefs.edit().putString(KEY_MASCOTAS_LISTA, jsonListaNueva).apply()
+        requireActivity().onBackPressed()
     }
 }
