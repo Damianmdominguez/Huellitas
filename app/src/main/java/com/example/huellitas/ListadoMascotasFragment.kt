@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.huellitas.viewmodel.MascotaViewModel
@@ -27,7 +29,13 @@ class ListadoMascotasFragment : Fragment() {
         recyclerViewMascotas = view.findViewById(R.id.recyclerViewMascotas)
         tvListaVacia = view.findViewById(R.id.tvListaVacia)
 
-        mascotasAdapter = MascotasAdapter(requireContext())
+        mascotasAdapter = MascotasAdapter(requireContext()) { mascotaSeleccionada ->
+
+            val bundle = bundleOf("mascota" to mascotaSeleccionada)
+
+            findNavController().navigate(R.id.nav_cargar, bundle)
+        }
+
         recyclerViewMascotas.adapter = mascotasAdapter
         recyclerViewMascotas.layoutManager = LinearLayoutManager(requireContext())
 

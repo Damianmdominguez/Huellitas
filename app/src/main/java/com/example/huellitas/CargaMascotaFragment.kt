@@ -12,6 +12,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.huellitas.model.Mascota
 import com.example.huellitas.viewmodel.MascotaViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -22,14 +23,15 @@ class CargaMascotaFragment : Fragment() {
     private lateinit var spinnerEspecie: Spinner
     private lateinit var spinnerEstado: Spinner
     private lateinit var etDescripcion: TextInputEditText
-
     private lateinit var etZona: AutoCompleteTextView
-
     private lateinit var etContacto: TextInputEditText
     private lateinit var chkCastrado: CheckBox
     private lateinit var btnGuardar: Button
+    private lateinit var btnEliminar: Button
 
     private lateinit var mascotaViewModel: MascotaViewModel
+
+    private var mascotaAEditar: Mascota? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,6 +47,7 @@ class CargaMascotaFragment : Fragment() {
         etContacto = view.findViewById(R.id.etContacto)
         chkCastrado = view.findViewById(R.id.chkCastrado)
         btnGuardar = view.findViewById(R.id.btnGuardar)
+        btnEliminar = view.findViewById(R.id.btnEliminar)
 
         mascotaViewModel = ViewModelProvider(this).get(MascotaViewModel::class.java)
 
@@ -56,8 +59,47 @@ class CargaMascotaFragment : Fragment() {
 
         setupBarriosDropdown()
 
+        arguments?.let { bundle ->
+
+            mascotaAEditar = bundle.getSerializable("mascota") as Mascota?
+        }
+
+        if (mascotaAEditar != null) {
+            configurarModoEdicion(mascotaAEditar!!)
+        } else {
+            btnGuardar.text = "Guardar Reporte"
+            btnEliminar.visibility = View.GONE
+        }
+
         btnGuardar.setOnClickListener {
-            guardarMascota()
+            guardarOActualizarMascota()
+        }
+
+        btnEliminar.setOnClickListener {
+            eliminarMascota()
+        }
+    }
+
+    private fun configurarModoEdicion(mascota: Mascota) {
+        btnGuardar.text = "Actualizar Mascota"
+        btnEliminar.visibility = View.VISIBLE
+
+        etNombre.setText(mascota.nombre)
+        etDescripcion.setText(mascota.descripcion)
+        etZona.setText(mascota.zona, false)
+        etContacto.setText(mascota.contacto)
+        chkCastrado.isChecked = mascota.castrado
+
+        setSpinnerValue(spinnerEspecie, mascota.especie)
+        setSpinnerValue(spinnerEstado, mascota.estado)
+    }
+
+    private fun setSpinnerValue(spinner: Spinner, value: String) {
+        for (i in 0 until spinner.count) {
+            if (spinner.getItemAtPosition(i).toString() == value) {
+                spinner.setSelection(i)
+                break
+            }
         }
     }
 
@@ -68,10 +110,9 @@ class CargaMascotaFragment : Fragment() {
             android.R.layout.simple_dropdown_item_1line
         )
         etZona.setAdapter(barriosAdapter)
-
     }
 
-    private fun guardarMascota() {
+    private fun guardarOActualizarMascota() {
         val nombre = etNombre.text.toString().trim()
         val descripcion = etDescripcion.text.toString().trim()
         val zona = etZona.text.toString().trim()
@@ -82,20 +123,42 @@ class CargaMascotaFragment : Fragment() {
             return
         }
 
-        val nuevaMascota = Mascota(
-            nombre = nombre.ifEmpty { "Sin nombre" },
-            especie = spinnerEspecie.selectedItem.toString(),
-            estado = spinnerEstado.selectedItem.toString(),
-            descripcion = descripcion,
-            contacto = contacto,
-            zona = zona,
-            castrado = chkCastrado.isChecked
-        )
+        if (mascotaAEditar == null) {
+            val nuevaMascota = Mascota(
+                nombre = nombre.ifEmpty { "Sin nombre" },
+                especie = spinnerEspecie.selectedItem.toString(),
+                estado = spinnerEstado.selectedItem.toString(),
+                descripcion = descripcion,
+                contacto = contacto,
+                zona = zona,
+                castrado = chkCastrado.isChecked
+            )
+            mascotaViewModel.insert(nuevaMascota)
+            Toast.makeText(requireContext(), "Mascota creada con éxito", Toast.LENGTH_SHORT).show()
 
-        mascotaViewModel.insert(nuevaMascota)
+        } else {
+            val mascotaEditada = Mascota(
+                id = mascotaAEditar!!.id,
+                nombre = nombre.ifEmpty { "Sin nombre" },
+                especie = spinnerEspecie.selectedItem.toString(),
+                estado = spinnerEstado.selectedItem.toString(),
+                descripcion = descripcion,
+                contacto = contacto,
+                zona = zona,
+                castrado = chkCastrado.isChecked
+            )
+            mascotaViewModel.update(mascotaEditada)
+            Toast.makeText(requireContext(), "Mascota actualizada", Toast.LENGTH_SHORT).show()
+        }
 
-        Toast.makeText(requireContext(), getString(R.string.msg_mascota_guardada), Toast.LENGTH_LONG).show()
+        findNavController().popBackStack()
+    }
 
-        requireActivity().onBackPressed()
+    private fun eliminarMascota() {
+        if (mascotaAEditar != null) {
+            mascotaViewModel.delete(mascotaAEditar!!)
+            Toast.makeText(requireContext(), "Mascota eliminada", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
+        }
     }
 }

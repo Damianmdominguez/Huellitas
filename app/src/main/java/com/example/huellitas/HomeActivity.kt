@@ -3,77 +3,56 @@ package com.example.huellitas
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.widget.TextView
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment // Importamos Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 
-class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class HomeActivity : AppCompatActivity() {
 
+    private lateinit var navController: NavController
     private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
-    private lateinit var toolbar: Toolbar
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        toolbar = findViewById(R.id.toolbar)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         drawerLayout = findViewById(R.id.drawer_layout)
-        navigationView = findViewById(R.id.nav_view)
-        navigationView.setNavigationItemSelectedListener(this)
+        val navView: NavigationView = findViewById(R.id.nav_view)
 
-        loadNavHeaderData()
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
+        appBarConfiguration = AppBarConfiguration(
+            setOf(R.id.nav_listado, R.id.nav_cargar),
+            drawerLayout
         )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
+        setupActionBarWithNavController(navController, appBarConfiguration)
 
+        navView.setupWithNavController(navController)
 
-        if (savedInstanceState == null) {
-            cargarFragmento(ListadoMascotasFragment(), getString(R.string.menu_listado))
-            navigationView.setCheckedItem(R.id.nav_listado)
-        }
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_listado -> {
-
-                cargarFragmento(ListadoMascotasFragment(), getString(R.string.menu_listado))
-            }
-
-            R.id.nav_cargar -> {
-                cargarFragmento(CargaMascotaFragment(), getString(R.string.menu_cargar))
-            }
-
-            R.id.nav_salir -> {
-                cerrarSesion()
-            }
+        navView.menu.findItem(R.id.nav_salir).setOnMenuItemClickListener {
+            cerrarSesion()
+            true
         }
 
-        drawerLayout.closeDrawer(GravityCompat.START)
-        return true
+        loadNavHeaderData(navView)
     }
 
-
-    private fun cargarFragmento(fragmento: Fragment, titulo: String) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragmento)
-            .addToBackStack(null) // Permite volver atrás entre fragmentos
-            .commit()
-        toolbar.title = titulo // Actualizamos el título del Toolbar
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     private fun cerrarSesion() {
@@ -83,26 +62,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         finish()
     }
 
-    private fun loadNavHeaderData() {
-        val headerView = navigationView.getHeaderView(0)
+    private fun loadNavHeaderData(navView: NavigationView) {
+        val headerView = navView.getHeaderView(0)
         val tvHeaderEmail = headerView.findViewById<TextView>(R.id.tvHeaderEmail)
         val prefs = getSharedPreferences(RegistroActivity.PREFS_NAME_USUARIO, Context.MODE_PRIVATE)
         val email = prefs.getString("LOGGED_USER_EMAIL", "usuario@ejemplo.com")
         tvHeaderEmail.text = email
-    }
-
-    override fun onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            if (supportFragmentManager.backStackEntryCount > 1) {
-                supportFragmentManager.popBackStack()
-                navigationView.setCheckedItem(R.id.nav_listado)
-                toolbar.title = getString(R.string.menu_listado)
-            } else {
-                super.onBackPressed()
-                finish()
-            }
-        }
     }
 }

@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.huellitas.model.Mascota
 
 class MascotasAdapter(
-    private val context: Context
+    private val context: Context,
+    private val onItemClick: (Mascota) -> Unit
 ) : RecyclerView.Adapter<MascotasAdapter.MascotaViewHolder>() {
 
     private var listaMascotas = emptyList<Mascota>()
@@ -42,6 +43,10 @@ class MascotasAdapter(
             holder.tvCastrado.visibility = View.VISIBLE
         } else {
             holder.tvCastrado.visibility = View.GONE
+        }
+
+        holder.itemView.setOnClickListener {
+            onItemClick(mascota)
         }
     }
 

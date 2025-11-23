@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_listado">
+
+    <fragment
+        android:id="@+id/nav_listado"
+        android:name="com.example.huellitas.ListadoMascotasFragment"
+        android:label="@string/menu_listado"
+        tools:layout="@layout/fragment_listado_mascotas">
+
+        <action
+            android:id="@+id/action_listado_to_carga"
+            app:destination="@id/nav_cargar" />
+
+        <action
+            android:id="@+id/action_listado_to_editar"
+            app:destination="@id/nav_cargar" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_cargar"
+        android:name="com.example.huellitas.CargaMascotaFragment"
+        android:label="@string/menu_cargar"
+        tools:layout="@layout/fragment_carga_mascota">
+
+        <argument
+            android:name="mascota"
+            app:argType="com.example.huellitas.model.Mascota"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+</navigation>
