@@ -16,10 +16,9 @@ data class Usuario(
 @Entity(tableName = "tabla_mascotas")
 data class Mascota(
 
-    // ID autogenerado por la base de datos (Clave Primaria)
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
-    val id: Long = 0, // Por defecto 0, Room se encarga de poner el número real
+    val id: Long = 0,
 
     @ColumnInfo(name = "nombre")
     val nombre: String,
@@ -40,5 +39,8 @@ data class Mascota(
     val zona: String,
 
     @ColumnInfo(name = "castrado")
-    val castrado: Boolean
+    val castrado: Boolean,
+
+    @ColumnInfo(name = "imagenUrl")
+    val imagenUrl: String? = null
 ) : Serializable

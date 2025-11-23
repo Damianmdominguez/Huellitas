@@ -7,14 +7,13 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-// Importamos nuestra entidad de datos (del Paso 2).
 import com.example.huellitas.model.Usuario
 import com.google.android.material.textfield.TextInputEditText
 
 class RegistroActivity : AppCompatActivity() {
 
     companion object {
-        const val PREFS_NAME_USUARIO = "UsuarioPrefs" // Nombre del "archivo" de preferencias
+        const val PREFS_NAME_USUARIO = "UsuarioPrefs"
         const val KEY_USUARIO = "user_name"
         const val KEY_CLAVE = "user_pass"
         const val KEY_EMAIL = "user_email"

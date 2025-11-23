@@ -1,5 +1,6 @@
 package com.example.huellitas
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,11 +9,15 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView // --- NUEVO ---
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest // --- NUEVO ---
+import androidx.activity.result.contract.ActivityResultContracts // --- NUEVO ---
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import coil.load // --- NUEVO
 import com.example.huellitas.model.Mascota
 import com.example.huellitas.viewmodel.MascotaViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -29,9 +34,25 @@ class CargaMascotaFragment : Fragment() {
     private lateinit var btnGuardar: Button
     private lateinit var btnEliminar: Button
 
-    private lateinit var mascotaViewModel: MascotaViewModel
+    private lateinit var ivMascotaPreview: ImageView
+    private lateinit var btnSeleccionarFoto: Button
 
+    private lateinit var mascotaViewModel: MascotaViewModel
     private var mascotaAEditar: Mascota? = null
+
+    private var uriImagenSeleccionada: String? = null
+
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            requireContext().contentResolver.takePersistableUriPermission(uri, flag)
+
+            ivMascotaPreview.load(uri)
+
+            uriImagenSeleccionada = uri.toString()
+        } else {
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +70,9 @@ class CargaMascotaFragment : Fragment() {
         btnGuardar = view.findViewById(R.id.btnGuardar)
         btnEliminar = view.findViewById(R.id.btnEliminar)
 
+        ivMascotaPreview = view.findViewById(R.id.ivMascotaPreview)
+        btnSeleccionarFoto = view.findViewById(R.id.btnSeleccionarFoto)
+
         mascotaViewModel = ViewModelProvider(this).get(MascotaViewModel::class.java)
 
         return view
@@ -60,7 +84,6 @@ class CargaMascotaFragment : Fragment() {
         setupBarriosDropdown()
 
         arguments?.let { bundle ->
-
             mascotaAEditar = bundle.getSerializable("mascota") as Mascota?
         }
 
@@ -71,12 +94,11 @@ class CargaMascotaFragment : Fragment() {
             btnEliminar.visibility = View.GONE
         }
 
-        btnGuardar.setOnClickListener {
-            guardarOActualizarMascota()
-        }
+        btnGuardar.setOnClickListener { guardarOActualizarMascota() }
+        btnEliminar.setOnClickListener { eliminarMascota() }
 
-        btnEliminar.setOnClickListener {
-            eliminarMascota()
+        btnSeleccionarFoto.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
     }
 
@@ -92,24 +114,11 @@ class CargaMascotaFragment : Fragment() {
 
         setSpinnerValue(spinnerEspecie, mascota.especie)
         setSpinnerValue(spinnerEstado, mascota.estado)
-    }
 
-    private fun setSpinnerValue(spinner: Spinner, value: String) {
-        for (i in 0 until spinner.count) {
-            if (spinner.getItemAtPosition(i).toString() == value) {
-                spinner.setSelection(i)
-                break
-            }
+        if (mascota.imagenUrl != null) {
+            ivMascotaPreview.load(mascota.imagenUrl)
+            uriImagenSeleccionada = mascota.imagenUrl
         }
-    }
-
-    private fun setupBarriosDropdown() {
-        val barriosAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.barrios_caba,
-            android.R.layout.simple_dropdown_item_1line
-        )
-        etZona.setAdapter(barriosAdapter)
     }
 
     private fun guardarOActualizarMascota() {
@@ -131,10 +140,12 @@ class CargaMascotaFragment : Fragment() {
                 descripcion = descripcion,
                 contacto = contacto,
                 zona = zona,
-                castrado = chkCastrado.isChecked
+                castrado = chkCastrado.isChecked,
+
+                imagenUrl = uriImagenSeleccionada
             )
             mascotaViewModel.insert(nuevaMascota)
-            Toast.makeText(requireContext(), "Mascota creada con éxito", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Mascota creada", Toast.LENGTH_SHORT).show()
 
         } else {
             val mascotaEditada = Mascota(
@@ -145,7 +156,9 @@ class CargaMascotaFragment : Fragment() {
                 descripcion = descripcion,
                 contacto = contacto,
                 zona = zona,
-                castrado = chkCastrado.isChecked
+                castrado = chkCastrado.isChecked,
+
+                imagenUrl = uriImagenSeleccionada
             )
             mascotaViewModel.update(mascotaEditada)
             Toast.makeText(requireContext(), "Mascota actualizada", Toast.LENGTH_SHORT).show()
@@ -160,5 +173,23 @@ class CargaMascotaFragment : Fragment() {
             Toast.makeText(requireContext(), "Mascota eliminada", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
+    }
+
+    private fun setSpinnerValue(spinner: Spinner, value: String) {
+        for (i in 0 until spinner.count) {
+            if (spinner.getItemAtPosition(i).toString() == value) {
+                spinner.setSelection(i)
+                break
+            }
+        }
+    }
+
+    private fun setupBarriosDropdown() {
+        val barriosAdapter = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.barrios_caba,
+            android.R.layout.simple_dropdown_item_1line
+        )
+        etZona.setAdapter(barriosAdapter)
     }
 }

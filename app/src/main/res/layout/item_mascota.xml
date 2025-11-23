@@ -5,82 +5,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
     app:cardElevation="4dp"
     app:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/tvNombreMascota"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Nombre Mascota"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            android:textColor="@color/colorPrimary"
+        <ImageView
+            android:id="@+id/ivFotoMascota"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:background="#EEEEEE"
+            android:src="@android:drawable/ic_menu_camera"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tvEstado"/>
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <TextView
-            android:id="@+id/tvEstado"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Perdido"
-            android:textStyle="bold"
-            android:padding="4dp"
-            android:background="@drawable/background_estado"
-            android:textColor="@android:color/white"
+            android:padding="12dp"
+            app:layout_constraintStart_toEndOf="@id/ivFotoMascota"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="HardcodedText" />
+            app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/tvDescripcion"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Descripción de la mascota, señas particulares, color, etc."
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvNombreMascota" />
+            <TextView
+                android:id="@+id/tvNombreMascota"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Toby"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                android:textColor="@color/colorPrimary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/tvEstado"/>
 
-        <TextView
-            android:id="@+id/tvZona"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Zona: Lomas de Zamora"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvDescripcion" />
+            <TextView
+                android:id="@+id/tvEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Perdido"
+                android:textStyle="bold"
+                android:padding="4dp"
+                android:background="@drawable/background_estado"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvContacto"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Contacto: 11-1234-5678"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvZona" />
+            <TextView
+                android:id="@+id/tvDescripcion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Descripción..."
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvNombreMascota" />
 
-        <TextView
-            android:id="@+id/tvCastrado"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Castrado/a"
-            android:visibility="gone"
-            android:textStyle="italic"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvContacto"
-            tools:visibility="visible"/>
+            <TextView
+                android:id="@+id/tvZona"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Zona: Palermo"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvDescripcion" />
+
+            <TextView
+                android:id="@+id/tvCastrado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Castrado/a"
+                android:visibility="visible"
+                android:textStyle="italic"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvZona" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
